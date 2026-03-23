@@ -1,28 +1,22 @@
 package pa.taller3.servidor.controlador;
 
-import Pa.taller3.servidor.modelo.Dohyo;
-import Pa.taller3.servidor.modelo.ResultadoTurno;
-import Pa.taller3.servidor.modelo.Rikishi;
+import pa.taller3.servidor.dao.ConexionDB;
+import pa.taller3.servidor.dao.IRikishiDAO;
+import pa.taller3.servidor.dao.RikishiDAOImpl;
+import pa.taller3.servidor.modelo.Dohyo;
+import pa.taller3.servidor.modelo.ResultadoTurno;
+import pa.taller3.servidor.modelo.Rikishi;
 import pa.taller3.servidor.vista.VentanaServidor;
 
+import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  * Controlador principal del servidor de sumo.
  *
- * <p>Implementa {@link EventoCombateListener} para recibir eventos
- * desde los hilos de red y actualizarlos <b>de forma segura</b> en la
- * GUI usando {@code SwingUtilities.invokeLater()}.</p>
- *
- * <ul>
- *   <li>Crea el {@link Dohyo} (modelo)</li>
- *   <li>Crea el {@link ServidorSumo} (red/thread)</li>
- *   <li>Actualiza la {@link VentanaServidor} (vista) con cada evento</li>
- * </ul>
- *
- *
- * <p><b>Principio DIP:</b> depende de {@link EventoCombateListener}
- * (abstracción), no de los hilos concretos.</p>
+ * <p>Inicializa la BD via Singleton, crea el DAO e inyecta
+ * todo al ServidorSumo.</p>
  *
  * @author Julian, Miguel, Andres
  * @version 1.0
@@ -32,33 +26,69 @@ public class ControladorServidor implements EventoCombateListener {
     /** Vista del servidor. */
     private final VentanaServidor vista;
 
-    /** El dohyō donde ocurre el combate. */
-    private final Dohyo dohyo;
-
-    /** El servidor de sockets. */
-    private final ServidorSumo servidor;
+    /**
+     * El dohyō donde ocurre el combate.
+     * No es final: solo se asigna si la BD conecta correctamente.
+     */
+    private Dohyo dohyo;
 
     /**
-     * Construye el controlador, crea la vista, el dohyō y arranca el servidor.
-     * El Launcher solo instancia este controlador sin pasar objetos.
+     * El servidor de sockets.
+     * No es final: solo se asigna si la BD conecta correctamente.
+     */
+    private ServidorSumo servidor;
+
+    /**
+     * DAO de luchadores.
+     * No es final: solo se asigna si la BD conecta correctamente.
+     */
+    private IRikishiDAO rikishiDAO;
+
+    /**
+     * Construye el controlador, inicializa la BD y arranca el servidor.
      */
     public ControladorServidor() {
-        this.vista   = new VentanaServidor();
+        this.vista = new VentanaServidor();
         this.vista.setVisible(true);
-        this.dohyo   = new Dohyo();
-        this.servidor = new ServidorSumo(dohyo, this);
+
+        String rutaProperties = seleccionarProperties();
+        if (rutaProperties == null) {
+            vista.mostrarError("No se seleccionó archivo de configuración.");
+            return;
+        }
+
+        try {
+            ConexionDB.getInstance(rutaProperties);
+            this.rikishiDAO = new RikishiDAOImpl(ConexionDB.getInstance());
+            vista.mostrarLog("✅ Conexión a base de datos establecida.");
+        } catch (RuntimeException e) {
+            vista.mostrarError("Error al conectar con la BD: " + e.getMessage());
+            return;
+        }
+
+        this.dohyo    = new Dohyo();
+        this.servidor = new ServidorSumo(dohyo, this, rikishiDAO);
         servidor.setDaemon(false);
         servidor.start();
+        vista.mostrarLog("🌐 Servidor iniciado en puerto " + Protocolo.PUERTO);
     }
 
-    // ── Implementación EventoCombateListener ─────────────────────────────────
-
     /**
-     * Recibe el evento de llegada de un luchador y lo pasa a la vista.
-     * Siempre en el EDT de Swing vía {@code invokeLater}.
+     * Abre JFileChooser para seleccionar db.properties.
      *
-     * @param luchador El luchador que llegó.
+     * @return ruta del archivo o null si canceló
      */
+    private String seleccionarProperties() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Seleccionar db.properties");
+        chooser.setFileFilter(
+            new FileNameExtensionFilter("Archivos .properties", "properties"));
+        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+            return chooser.getSelectedFile().getAbsolutePath();
+        }
+        return null;
+    }
+
     @Override
     public void onLuchadorLlego(Rikishi luchador) {
         String nombre = luchador.getNombre();
@@ -67,12 +97,6 @@ public class ControladorServidor implements EventoCombateListener {
         SwingUtilities.invokeLater(() -> vista.mostrarLuchadorLlego(nombre, peso, vic));
     }
 
-    /**
-     * Recibe el evento de inicio de combate.
-     *
-     * @param luchador1 Primer luchador.
-     * @param luchador2 Segundo luchador.
-     */
     @Override
     public void onCombateInicia(Rikishi luchador1, Rikishi luchador2) {
         String n1 = luchador1.getNombre();
@@ -80,12 +104,6 @@ public class ControladorServidor implements EventoCombateListener {
         SwingUtilities.invokeLater(() -> vista.mostrarInicioCombate(n1, n2));
     }
 
-    /**
-     * Recibe el evento de ejecución de un turno.
-     *
-     * @param luchador El luchador que atacó.
-     * @param resultado Resultado del turno.
-     */
     @Override
     public void onTurnoEjecutado(Rikishi luchador, ResultadoTurno resultado) {
         String nombre  = luchador.getNombre();
@@ -95,11 +113,6 @@ public class ControladorServidor implements EventoCombateListener {
         SwingUtilities.invokeLater(() -> vista.mostrarTurno(nombre, tecnica, saco));
     }
 
-    /**
-     * Recibe el evento de fin de combate.
-     *
-     * @param ganador El luchador ganador.
-     */
     @Override
     public void onCombateTermino(Rikishi ganador) {
         String nombre = ganador.getNombre();
@@ -107,22 +120,12 @@ public class ControladorServidor implements EventoCombateListener {
         SwingUtilities.invokeLater(() -> vista.mostrarGanador(nombre, vic));
     }
 
-    /**
-     * Recibe la confirmación de un cliente.
-     *
-     * @param luchador El luchador cuyo cliente confirmó.
-     */
     @Override
     public void onClienteConfirmo(Rikishi luchador) {
         String nombre = luchador.getNombre();
         SwingUtilities.invokeLater(() -> vista.mostrarClienteDesconectado(nombre));
     }
 
-    /**
-     * Recibe un error de la red.
-     *
-     * @param mensaje Descripción del error.
-     */
     @Override
     public void onError(String mensaje) {
         SwingUtilities.invokeLater(() -> vista.mostrarError(mensaje));
