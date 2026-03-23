@@ -1,4 +1,4 @@
-package Pa.taller3.servidor.modelo;
+package pa.taller3.servidor.modelo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +16,12 @@ import java.util.Random;
  */
 public class Rikishi {
 
-    /** UID de serialización. */
+    /** Identificador en la base de datos. */
+    private int id;
+
+    /** Indica si ya participó en un combate. */
+    private boolean haCombatido;
+
     /** Nombre del luchador. */
     private String nombre;
 
@@ -67,6 +72,8 @@ public class Rikishi {
         this.kimarites = new ArrayList<>();
         this.dentroDohyo = true;
         this.random = new Random();
+        this.haCombatido  = false;
+        this.id = 0;
     }
 
     /**
@@ -141,6 +148,18 @@ public class Rikishi {
      * @throws IOException            Si hay error de lectura.
      * @throws ClassNotFoundException Si falta alguna clase.
      */
+
+    /** @return ID en la base de datos. */
+    public int getId() { return id; }
+
+    /** @param id ID generado por la BD. */
+    public void setId(int id) { this.id = id; }
+
+    /** @return true si ya combatió. */
+    public boolean isHaCombatido() { return haCombatido; }
+
+    /** @param haCombatido estado de participación. */
+    public void setHaCombatido(boolean haCombatido) { this.haCombatido = haCombatido; }
 
     /**
      * Representación en texto del luchador para logs.
