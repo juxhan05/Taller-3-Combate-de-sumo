@@ -1,7 +1,7 @@
 package pa.taller3.servidor.controlador;
 
-import Pa.taller3.servidor.modelo.ResultadoTurno;
-import Pa.taller3.servidor.modelo.Rikishi;
+import pa.taller3.servidor.modelo.ResultadoTurno;
+import pa.taller3.servidor.modelo.Rikishi;
 
 /**
  * Interfaz observadora (patrón Observer) para eventos del combate.

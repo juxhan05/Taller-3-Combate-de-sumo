@@ -1,7 +1,7 @@
 package pa.taller3.servidor.modelo;
 
-import Pa.taller3.servidor.modelo.Kimarite;
-import Pa.taller3.servidor.modelo.Rikishi;
+import pa.taller3.servidor.modelo.Kimarite;
+import pa.taller3.servidor.modelo.Rikishi;
 
 import java.util.Random;
 

@@ -16,10 +16,16 @@ import java.util.Random;
  */
 public class Rikishi {
 
-    /** Identificador en la base de datos. */
+    /**
+     * Identificador en la base de datos.
+     * Asignado por el DAO tras el INSERT.
+     */
     private int id;
 
-    /** Indica si ya participó en un combate. */
+    /**
+     * Indica si este luchador ya participó en un combate.
+     * Persiste en BD para que no vuelva a combatir.
+     */
     private boolean haCombatido;
 
     /** Nombre del luchador. */
@@ -66,14 +72,14 @@ public class Rikishi {
      * @param victorias Victorias previas acumuladas.
      */
     public Rikishi(String nombre, double peso, int victorias) {
-        this.nombre = nombre;
-        this.peso = peso;
-        this.victorias = victorias;
-        this.kimarites = new ArrayList<>();
-        this.dentroDohyo = true;
-        this.random = new Random();
+        this.nombre       = nombre;
+        this.peso         = peso;
+        this.victorias    = victorias;
+        this.kimarites    = new ArrayList<>();
+        this.dentroDohyo  = true;
         this.haCombatido  = false;
-        this.id = 0;
+        this.id           = 0;
+        this.random       = new Random();
     }
 
     /**
@@ -137,6 +143,34 @@ public class Rikishi {
     public void setRival(Rikishi rival) { this.rival = rival; }
 
     /**
+     * Retorna el ID del luchador en la base de datos.
+     *
+     * @return ID asignado por el DAO, o 0 si aún no fue guardado.
+     */
+    public int getId() { return id; }
+
+    /**
+     * Establece el ID de la base de datos (lo asigna el DAO tras el INSERT).
+     *
+     * @param id ID generado por la BD.
+     */
+    public void setId(int id) { this.id = id; }
+
+    /**
+     * Indica si el luchador ya participó en un combate.
+     *
+     * @return {@code true} si ya combatió.
+     */
+    public boolean isHaCombatido() { return haCombatido; }
+
+    /**
+     * Marca al luchador como combatiente (se persiste en BD).
+     *
+     * @param haCombatido {@code true} para marcarlo como ya combatido.
+     */
+    public void setHaCombatido(boolean haCombatido) { this.haCombatido = haCombatido; }
+
+    /**
      * Reinicializa campos transient después de deserialización por socket.
      *
      * <p>Java llama este método automáticamente al reconstruir el objeto.
@@ -148,18 +182,6 @@ public class Rikishi {
      * @throws IOException            Si hay error de lectura.
      * @throws ClassNotFoundException Si falta alguna clase.
      */
-
-    /** @return ID en la base de datos. */
-    public int getId() { return id; }
-
-    /** @param id ID generado por la BD. */
-    public void setId(int id) { this.id = id; }
-
-    /** @return true si ya combatió. */
-    public boolean isHaCombatido() { return haCombatido; }
-
-    /** @param haCombatido estado de participación. */
-    public void setHaCombatido(boolean haCombatido) { this.haCombatido = haCombatido; }
 
     /**
      * Representación en texto del luchador para logs.

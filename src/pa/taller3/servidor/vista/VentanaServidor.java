@@ -262,8 +262,23 @@ public class VentanaServidor extends JFrame {
      *
      * @param mensaje Descripcion del error.
      */
+    /**
+     * Muestra un error en el log.
+     *
+     * @param mensaje Descripcion del error.
+     */
     public void mostrarError(String mensaje) {
         agregarLog("✗ ERROR: " + mensaje);
+    }
+
+    /**
+     * Agrega un mensaje informativo al log del servidor.
+     * Usado por el controlador para eventos de BD, red, etc.
+     *
+     * @param mensaje Mensaje a mostrar en el log.
+     */
+    public void mostrarLog(String mensaje) {
+        agregarLog(mensaje);
     }
 
     private void agregarLog(String texto) {
