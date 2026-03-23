@@ -1,4 +1,4 @@
-package Pa.taller3.servidor.modelo;
+package pa.taller3.servidor.modelo;
 
 import Pa.taller3.servidor.modelo.Kimarite;
 import Pa.taller3.servidor.modelo.Rikishi;
