@@ -1,5 +1,4 @@
-package Pa.taller3.servidor.modelo;
-
+package pa.taller3.servidor.modelo;
 /**
  * Objeto de transferencia que encapsula el resultado de un turno.
  *
