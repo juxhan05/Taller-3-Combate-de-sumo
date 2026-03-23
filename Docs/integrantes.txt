@@ -4,6 +4,7 @@ Integrantes del grupo:
 -Julian Andres Salazar Belilla - 20251020131
 
 Asignatura: Programación Avanzada
-Taller No. 3 - Concurrencia: El Combate de Sumo
+Parcial-1 - El Combate de Sumo
 Universidad Distrital Francisco José de Caldas
 Ingeniería de Sistemas
+

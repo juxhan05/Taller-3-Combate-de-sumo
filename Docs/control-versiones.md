@@ -35,8 +35,4 @@
 - **Versión 0.3**: Se implementa lógica de combates concurrentes.
 - **Versión final (1.0)**: Proyecto completo con interfaz gráfica y persistencia en archivos.
 
----
 
-👉 Lo que podemos hacer es que tú me vas diciendo los cambios que realizas en cada commit o merge, y yo te los redacto en este formato para que luego lo pegues en el documento de Git dentro de la carpeta **Docs**.  
-
-¿Quieres que empecemos ya con el **primer commit inicial** (estructura del proyecto en MVC), y lo vamos llenando paso a paso?
